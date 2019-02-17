@@ -1,6 +1,4 @@
-// client-side js
-// run by the browser each time your view template referencing it is loaded
-
+/* global generatePie */
 let datapoints = [];
 
 // define variables that reference elements on our page

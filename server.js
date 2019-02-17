@@ -45,6 +45,9 @@ app.get('/', function(request, response) {
 
 // endpoint to add datapoint in the database
 app.get('/addDatapoint', function(request, response) {
+  console.log( "secret?", (process.env.SECRET == request.query.secret ) );
+  // could be used to not add content if the secret doesn't match
+  // see .env to setup the secret code server side
   var stmt = db.prepare("INSERT INTO ThoughExperimentData VALUES (?)");
   stmt.run( request.query.datapoint );
   stmt.finalize();
