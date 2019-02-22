@@ -12,9 +12,42 @@ AFRAME.registerComponent('experiment-setup', {
       newTarget.setAttribute("position",  position)
       return newTarget
     }
-    document.querySelector("#camera-rig").setAttribute("animation", "dur", experiment.animationDuration)
-    document.querySelector("#camera-rig").setAttribute("animation__left", "dur", experiment.animationDuration)
-    document.querySelector("#camera-rig").setAttribute("animation__right", "dur", experiment.animationDuration)
+    function addRail(position){      
+      var rail = document.createElement("a-entity")
+      
+      var location = document.createElement("a-entity")
+      location.setAttribute("scale", "5 5 5")
+      location.setAttribute("text", "value", AFRAME.utils.coordinates.stringify(position) )
+      location.setAttribute("position", "0 1 0")
+      
+      var leftRail = document.createElement("a-entity")
+      leftRail.setAttribute("geometry", "depth: " + experiment.trackLength + "; height: 0.1; width: 0.1")
+      leftRail.setAttribute("material", "color: #595959")
+      leftRail.setAttribute("position", "-0.25 0 0")
+      
+      var rightRail = document.createElement("a-entity")
+      rightRail.setAttribute("geometry", "depth: " + experiment.trackLength + "; height: 0.1; width: 0.1")
+      rightRail.setAttribute("material", "color: #595959")
+      rightRail.setAttribute("position", "0.25 0 0")
+      
+      for (var i=0; i<experiment.trackLength*2; i++){
+        var woordPart = document.createElement("a-entity")
+        woordPart.setAttribute("geometry", "depth: 0.1; height: 0.1; width: 1")
+        woordPart.setAttribute("material", "color: #542929")
+        woordPart.setAttribute("position", "0 -0.1 " + (i*experiment.trackLength/10 - 2.5) )
+        rail.appendChild(woordPart)
+      }
+      
+      if (experiment.debug) rail.appendChild(location)
+      rail.appendChild(leftRail)
+      rail.appendChild(rightRail)
+      rail.setAttribute("position",  position)
+      return rail
+    }
+    
+    document.querySelector("#camera-rig").setAttribute("animation", "dur", experiment.animationDuration * 1000)
+    document.querySelector("#camera-rig").setAttribute("animation__left", "dur", experiment.animationDuration * 1000)
+    document.querySelector("#camera-rig").setAttribute("animation__right", "dur", experiment.animationDuration * 1000)
     
     for (var i=0; i<experiment.leftTargets; i++){
       document.querySelector("#left-targets").appendChild( addTarget(i, experiment.randomness) )
@@ -22,6 +55,26 @@ AFRAME.registerComponent('experiment-setup', {
     for (var i=0; i<experiment.rightTargets; i++){
       document.querySelector("#right-targets").appendChild( addTarget(i, experiment.randomness) )
     }
+    
+    for (var i=0; i<experiment.trackParts; i++){
+      var position = {x:0, y:0.2, z:-i*experiment.trackLength}
+      document.querySelector("#right-track").appendChild( addRail(position) )
+      position.y = -0.1
+      document.querySelector("#right-targets").setAttribute("position", position )
+    }
+    for (var i=0; i<experiment.trackParts/2; i++){
+      var position = {x:0, y:0.2, z:-i*experiment.trackLength}
+      document.querySelector("#left-track").appendChild( addRail(position) )
+      position.y = -0.1
+      document.querySelector("#left-targets").setAttribute("position", position )
+    }
+
+    // should also fix "left-track" position accordingly <a-entity id="left-track" rotation="0 41 0" position="-1.3 0 -24">
+    document.querySelector("#left-track").setAttribute("position", -experiment.trackParts/10 + " 0 " + -experiment.trackParts*2 )
+    document.querySelector("#camera-rig").setAttribute("animation", "to", experiment.trackParts/2 + " 0 " + -experiment.trackLength * (experiment.trackParts/2 - 1) )
+    document.querySelector("#camera-rig").setAttribute("animation__left", "to", -experiment.trackParts/2 + " 0 " + -experiment.trackLength * (experiment.trackParts - 1) )
+    document.querySelector("#camera-rig").setAttribute("animation__right", "to", experiment.trackParts + " 0 " + -experiment.trackLength * (experiment.trackParts - 1) )
+   
   }
 });
 
@@ -56,16 +109,21 @@ AFRAME.registerComponent('cursor-listener', {
               el.emit("goright");
               sendExperimentData("Right");
             }
-          }, experiment.animationDuration);
+          }, experiment.animationDuration * 1000);
           setTimeout(function(){
             // scream sound right before impact
-            document.querySelector("#camera").components.sound.playSound();            
-          }, 2 * experiment.animationDuration - 1000);
+            document.querySelector("#camera").components.sound.playSound();
+            if ( experiment.pushedLever ){
+              document.querySelector("#left-targets").emit("down");
+            } else {
+              document.querySelector("#right-targets").emit("down");
+            }
+          }, 2 * experiment.animationDuration * 1000 - 1000);
           setTimeout(function(){ 
             // stop the engine sound slight after impact
             document.querySelector("#camera-rig").components.sound.stopSound(); 
             experiment.finished = true;
-          }, 2 * experiment.animationDuration + 1000);
+          }, 2 * experiment.animationDuration * 1000 + 1000);
           for (var instruction of document.querySelectorAll(".instructions") )
             instruction.setAttribute("visible", false);
           break;

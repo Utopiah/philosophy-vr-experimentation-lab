@@ -12,7 +12,10 @@ var experiment = {
   randomness         : ( AFRAME.utils.getUrlParameter("randomness") === 'true')   || false,
   leftTargets        : Number( AFRAME.utils.getUrlParameter("leftTargets") )      || 1,
   rightTargets       : Number( AFRAME.utils.getUrlParameter("rightTargets") )     || 3,
-  animationDuration  : AFRAME.utils.getUrlParameter("animationDuration")          || 10000, //ms
+  animationDuration  : AFRAME.utils.getUrlParameter("animationDuration")          || 10, // seconds
+  trackParts         : Number( AFRAME.utils.getUrlParameter("trackParts") )       || 12,
+  trackLength        : Number( AFRAME.utils.getUrlParameter("trackLength") )      || 4,
+  debug              : ( AFRAME.utils.getUrlParameter("debug") === 'true')        || false,
   // internal application state
   pushedLever        : false,
   ready              : false,
@@ -24,48 +27,47 @@ var experiment = {
       <a-assets>
         <a-asset-item id="morty" src="https://fabien.benetou.fr/pub/home/assets_trolley_problem/morty/model.gltf"></a-asset-item>
         <a-asset-item id="trolley" src="https://fabien.benetou.fr/pub/home/assets_trolley_problem/trolley/model.gltf"></a-asset-item>
-        <a-asset-item id="track" src="https://fabien.benetou.fr/pub/home/assets_trolley_problem/tracks/model.gltf"></a-asset-item>
-        <audio id="startengine" src="https://fabien.benetou.fr/pub/home/assets_trolley_problem/startengine.mp3"></audio>
-        <audio id="leverpulled" src="https://fabien.benetou.fr/pub/home/assets_trolley_problem/lever.mp3"></audio>
-        <audio id="scream" src="https://fabien.benetou.fr/pub/home/assets_trolley_problem/scream.mp3"></audio>
+        <audio id="startengine" crossorigin="anonymous" src="https://fabien.benetou.fr/pub/home/assets_trolley_problem/startengine.mp3"></audio>
+        <audio id="leverpulled" crossorigin="anonymous" src="https://fabien.benetou.fr/pub/home/assets_trolley_problem/lever.mp3"></audio>
+        <audio id="scream" crossorigin="anonymous" src="https://fabien.benetou.fr/pub/home/assets_trolley_problem/scream.mp3"></audio>
       </a-assets>
       <a-entity environment="preset: forest"></a-entity>
       
-      <a-entity id="camera-rig" animation="property: position; to: 1.5 0 -7; dur: 5000; easing: linear; startEvents:go;"
-                 animation__left="property: position; to: -2,7 0 -15; dur: 5000; easing: linear; startEvents:goleft;"
-                 animation__right="property: position; to: 3.4 0 -15; dur: 5000; easing: linear; startEvents:goright;"
-                sound="src: #startengine;">
-        <a-entity class="instructions" text="value: Ready?" position="0.2 1.3 -0.4"></a-entity>
-        <a-entity class="instructions" text="value: Look here to start." position="0.5 1.3 -0.4"></a-entity>
-        <a-box cursor-listener id="engine-start-button" color="red" position="0.19325 1.36319 -0.44538" scale="0.2 0.1 0.02"
-                animation="property: position; to: 0.19325 1.36319 -0.5; dur: 500; easing: linear; startEvents:pushed;"></a-box>
-        <a-entity id="movingtrolley" position="-0.2 -5.6 0.5" scale="5 5 5" gltf-model="#trolley"></a-entity>
-        <a-entity id="camera" camera look-controls position="0 1.6 0" sound="src: #scream;">
-          <a-entity cursor="fuse: true; fuseTimeout: 500"
-                    position="0 0 -0.3"
-                    geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
-                    material="color: grey; shader: flat">
+      <a-entity id="world" position="0 0 25">
+
+        <a-entity id="camera-rig" animation="property: position; easing: linear; startEvents:go;"
+                   animation__left="property: position; asing: linear; startEvents:goleft;"
+                   animation__right="property: position; easing: linear; startEvents:goright;"
+                  sound="src: #startengine;">
+          <a-entity class="instructions" text="value: Ready?" position="0.2 1.3 -0.4"></a-entity>
+          <a-entity class="instructions" text="value: Look here to start." position="0.5 1.3 -0.4"></a-entity>
+          <a-box cursor-listener id="engine-start-button" color="red" position="0.19325 1.36319 -0.44538" scale="0.2 0.1 0.02"
+                  animation="property: object3D.position.z; to: -0.5; dur: 500; easing: linear; startEvents:pushed;"></a-box>
+          <a-entity id="movingtrolley" position="-0.2 -5.6 0.5" scale="5 5 5" gltf-model="#trolley"></a-entity>
+          <a-entity id="camera" camera look-controls position="0 1.6 0" sound="src: #scream;">
+            <a-entity cursor="fuse: true; fuseTimeout: 500"
+                      position="0 0 -0.3"
+                      geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+                      material="color: grey; shader: flat">
+            </a-entity>
           </a-entity>
         </a-entity>
+        
+        <a-entity id="right-track" rotation="0 -15 0">
+          <a-entity id="right-targets" class="human"
+                     animation="property: object3D.position.y; to: -0.9; dur: 1000; easing: linear; startEvents:down;"></a-entity>
+          <a-entity id="left-track" rotation="0 41 0">
+            <a-entity cursor-listener id="lever" position="0 0.5 3" geometry="primitive: cylinder; radius: 0.05" material=""
+                      animation="property: object3D.position.y; to: 0.1; dur: 1500; easing: linear; startEvents:pushedlever;"
+                      sound="src: #leverpulled;">
+              <a-sphere position="0 0.5" radius="0.1" color="red"></a-sphere>
+            </a-entity>
+            <a-entity id="left-targets" class="human"
+                     animation="property: object3D.position.y; to: -0.9; dur: 1000; easing: linear; startEvents:down;"></a-entity>      
+          </a-entity>
+        </a-entity>        
+       
       </a-entity>
-      
-      <a-entity cursor-listener id="lever" position="2.64697 0.5 -7" geometry="primitive: cylinder; radius: 0.05" material=""
-                animation="property: position; to: 2.64697 0.1 -7; dur: 1500; easing: linear; startEvents:pushedlever;"
-                sound="src: #leverpulled;">
-        <a-sphere position="0 0.5" radius="0.1" color="red"></a-sphere>
-      </a-entity>
-      
-      <a-entity id="track1-1" class="track-segment" position="3.47641 -3.26371 -5.85719" rotation="0 78.73" gltf-model="#track" scale="5 5 5"></a-entity>
-      <a-entity id="track1-2" class="track-segment" position="4.27192 -3.26371 -9.82667" rotation="0 78.73" gltf-model="#track" scale="5 5 5"></a-entity>
-      <a-entity id="track1-3" class="track-segment" position="5.08659 -3.26371 -13.92471" rotation="0 78.73" gltf-model="#track" scale="5 5 5"></a-entity>
-      <a-entity id="track1-4" class="track-segment" position="5.91029 -3.26371 -17.89004" rotation="0 78.73" gltf-model="#track" scale="5 5 5"></a-entity>
-      
-      <a-entity id="track3-1" class="track-segment" position="1.96955 -3.26371 -12.35657" rotation="0 119.99" gltf-model="#track" scale="5 5 5"></a-entity>
-      <a-entity id="track3-2" class="track-segment" position="-0.07333 -3.26371 -15.96363" rotation="0 119.99" gltf-model="#track" scale="5 5 5"></a-entity>
-      <a-entity id="track3-3" class="track-segment" position="-2.1109 -3.26371 -19.40892" rotation="0 119.99" gltf-model="#track" scale="5 5 5"></a-entity>
-      
-      <a-entity id="left-targets" class="human" position="-3 0 -15"></a-entity>      
-      <a-entity id="right-targets" class="human" position="3 0 -15"></a-entity>
       
       <a-sky color="#ECECEC"></a-sky>
     </a-scene>

@@ -43,6 +43,10 @@ app.get('/', function(request, response) {
   response.sendFile(__dirname + '/views/index.html');
 });
 
+app.get('/parents', function(request, response) {
+  response.json( JSON.parse(process.env.PROJECT_REMIX_CHAIN) );
+});
+
 // endpoint to add datapoint in the database
 app.get('/addDatapoint', function(request, response) {
   console.log( "secret?", (process.env.SECRET == request.query.secret ) );

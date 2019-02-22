@@ -4,10 +4,9 @@ let datapoints = [];
 // define variables that reference elements on our page
 const datapointsList = document.getElementById('datapoints');
 
-// a helper function to call when our request for datapoints is done
-const getDatapointsListener = function() {
-  // parse our response to convert to JSON
-  datapoints = JSON.parse(this.responseText);
+fetch('/getDatapoints')
+.then(function(response) { return response.json(); })
+.then(function(datapoints) {
   var value1 = 0
   var value2 = 0
   // iterate through every datapoint and add it to our page
@@ -20,22 +19,7 @@ const getDatapointsListener = function() {
   });
   
   generatePie(value1, value2) // from datapie.js
-}
-
-const addDatapointListener = function() {
-  // parse our response to convert to JSON
-  console.log(this.responseText);
-}
-
-// request the datapoints from our app's sqlite database
-const datapointRequest = new XMLHttpRequest();
-datapointRequest.onload = getDatapointsListener;
-datapointRequest.open('get', '/getDatapoints');
-datapointRequest.send();
-  
-const datapointAddRequest = new XMLHttpRequest();
-datapointAddRequest.onload = addDatapointListener;
-// assumed it went through...
+})
 
 // a helper function that creates a list item for a given datapoint
 const appendNewDatapoint = function(datapoint) {

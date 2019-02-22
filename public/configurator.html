@@ -28,11 +28,12 @@
       
       
       <p>Manual parameters:</p>
-      <form action="/">
-        randomness: <input type="radio" name="randomness" value="false">false <input type="radio" name="randomness" value="false" checked>true<br>        
+      <form action="/" target="_blank">
+        debug: <input type="radio" name="debug" value="false">false <input type="radio" name="debug" value="true" checked>true<br>        
+        randomness: <input type="radio" name="randomness" value="false">false <input type="radio" name="randomness" value="true" checked>true<br>        
         targets: left <input type="text" name="leftTargets"/>  
         <input type="text" name="rightTargets"/> right (from 0 to 10)<br>
-        animation duration: <input type="text" name="animationDuration"> (in ms)<br>
+        animation duration: <input type="text" name="animationDuration"> (in seconds)<br>
         secret code: <input type="text" name="secret"> (requires server side configuration, cf .env file)<br>
         <input type="submit" value="General URL to and try share to participant">
         <!--value="General URL to share to participant"> -->
