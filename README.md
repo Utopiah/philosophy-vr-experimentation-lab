@@ -1,5 +1,6 @@
 VR experiences philosophical, configurable and remixable
-------------
+
+https://user-images.githubusercontent.com/1076655/129204505-831cbc83-8327-4d7a-8c9f-a314cfdb3180.mp4
 
 - philosopher wanting to test the trolley problem go to `/`
 - philosopher checking the result of your trolley problem experiment go to `/results.html`
